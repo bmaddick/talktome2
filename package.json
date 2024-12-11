@@ -17,8 +17,19 @@
   },
   "build": {
     "appId": "com.bmaddick.talktome2",
+    "productName": "Talk To Me",
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "title": "${productName}",
+      "icon": "build/icon.icns",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
     }
   }
 }
