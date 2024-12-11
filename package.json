@@ -1,19 +1,17 @@
 {
   "name": "talktome2",
   "version": "1.0.0",
+  "description": "Mac Hello World Application",
   "main": "src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build": "electron-builder"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "electron": "^33.2.1",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^24.9.1"
   },
   "build": {
     "appId": "com.bmaddick.talktome2",
