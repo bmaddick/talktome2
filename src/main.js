@@ -1,12 +1,16 @@
-const { app, BrowserWindow, globalShortcut, ipcMain, clipboard, desktopCapturer } = require('electron');
+const { app, BrowserWindow, globalShortcut, ipcMain, clipboard, desktopCapturer, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { OpenAI } = require('openai');
-require('dotenv').config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+try {
+  require('dotenv').config();
+} catch (error) {
+  console.log('Error loading .env file:', error);
+}
+
+let apiKey = process.env.OPENAI_API_KEY;
+let openai;
 
 let mainWindow;
 let recording = false;
@@ -70,6 +74,18 @@ async function startRecording() {
   }
 }
 
+function initializeOpenAI() {
+  try {
+    openai = new OpenAI({
+      apiKey: apiKey
+    });
+    return true;
+  } catch (error) {
+    console.error('Error initializing OpenAI:', error);
+    return false;
+  }
+}
+
 async function stopRecording() {
   if (!recording) return;
   
@@ -82,6 +98,28 @@ async function stopRecording() {
   fs.writeFileSync(tempFile, audioBuffer);
   
   try {
+    if (!openai) {
+      if (!initializeOpenAI()) {
+        const result = dialog.showMessageBoxSync(mainWindow, {
+          type: 'question',
+          buttons: ['OK', 'Cancel'],
+          defaultId: 0,
+          title: 'OpenAI API Key Required',
+          message: 'Please enter your OpenAI API key:',
+          detail: 'Your API key is required for voice transcription. It will be stored locally and not shared.',
+          inputField: ''
+        });
+        
+        if (result.response === 0 && result.inputField) {
+          apiKey = result.inputField;
+          initializeOpenAI();
+        } else {
+          mainWindow.webContents.send('transcription-error', 'API key is required for transcription');
+          return;
+        }
+      }
+    }
+    
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFile),
       model: "whisper-1"
@@ -101,6 +139,8 @@ async function stopRecording() {
 
 app.whenReady().then(() => {
   createWindow();
+  
+  initializeOpenAI();
 
   globalShortcut.register('CommandOrControl+Shift+R', () => {
     if (!recording) {
