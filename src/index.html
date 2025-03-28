@@ -1,9 +1,58 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hello World</title>
+    <meta charset="UTF-8">
+    <title>Talk To Me</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        margin: 20px;
+        max-width: 100%;
+        color: #333;
+      }
+      button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      #transcript {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-height: 100px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Hello World</h1>
+    <h1>Talk To Me</h1>
+    <p>Press Command+Shift+R to start/stop recording, or use these buttons:</p>
+    <button id="recordBtn">Start Recording</button>
+    <div id="transcript"></div>
+    <script>
+      // Get references to elements
+      const recordBtn = document.getElementById('recordBtn');
+      let isRecording = false;
+      
+      // Setup button functionality
+      recordBtn.addEventListener('click', async () => {
+        if (!isRecording) {
+          await window.electronAPI.startRecording();
+          recordBtn.textContent = 'Stop Recording';
+          isRecording = true;
+        } else {
+          await window.electronAPI.stopRecording();
+          recordBtn.textContent = 'Start Recording';
+          isRecording = false;
+        }
+      });
+      
+      // Listen for transcript updates
+      window.electronAPI.getTranscription();
+    </script>
   </body>
 </html>
